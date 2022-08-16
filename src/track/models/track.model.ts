@@ -1,13 +1,30 @@
-import { Column, DataType, HasMany, Model, Table } from 'sequelize-typescript';
+import {
+  BelongsTo,
+  Column,
+  DataType,
+  ForeignKey,
+  HasMany,
+  Model,
+  Table,
+} from 'sequelize-typescript';
 import { Comment } from './comment.model';
+import { Album } from '../../album/models/album.model';
 
 @Table({ tableName: 'tracks' })
 export class Track extends Model {
+  @Column({
+    type: DataType.INTEGER,
+    unique: true,
+    autoIncrement: true,
+    primaryKey: true,
+  })
+  id: number;
+
   @Column({ type: DataType.STRING })
   name: string;
 
   @Column({ type: DataType.STRING })
-  musician: string;
+  artist: string;
 
   @Column({ type: DataType.STRING })
   text: string;
@@ -24,10 +41,9 @@ export class Track extends Model {
   @HasMany(() => Comment)
   comments: Comment[];
 
-  // @BelongsTo(() => Album)
-  // album: Album;
-  //
-  // @ForeignKey(() => Album)
-  // @Column({ type: DataType.INTEGER })
-  // albumId: number;
+  @BelongsTo(() => Album)
+  album: Album;
+  @ForeignKey(() => Album)
+  @Column({ type: DataType.INTEGER })
+  albumId: number;
 }

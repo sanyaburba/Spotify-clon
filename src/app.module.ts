@@ -13,6 +13,8 @@ import { User } from './users/models/users.model';
 import { Role } from './roles/models/roles.model';
 import { UserRoles } from './roles/models/user-roles.model';
 import { AuthModule } from './auth/auth.module';
+import { AlbumModule } from './album/album.module';
+import { Album } from './album/models/album.model';
 
 @Module({
   imports: [
@@ -29,7 +31,7 @@ import { AuthModule } from './auth/auth.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      models: [Track, Comment, Role, User, UserRoles],
+      models: [Track, Comment, Role, User, UserRoles, Album],
       autoLoadModels: true,
     }),
     TrackModule,
@@ -37,6 +39,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     RolesModule,
     AuthModule,
+    AlbumModule,
   ],
   controllers: [],
   providers: [],
