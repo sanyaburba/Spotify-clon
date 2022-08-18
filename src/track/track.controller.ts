@@ -18,6 +18,21 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 export class TrackController {
   constructor(private trackService: TrackService) {}
 
+  @Get()
+  getAll(@Query('count') count: number, @Query('offset') offset: number) {
+    return this.trackService.getAll(count, offset);
+  }
+
+  @Get(':id')
+  getOne(@Param('id') id: number) {
+    return this.trackService.getOne(id);
+  }
+
+  @Get('/search')
+  search(@Query('searchQuery') searchQuery: string) {
+    return this.trackService.search(searchQuery);
+  }
+
   @Post()
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -32,22 +47,7 @@ export class TrackController {
 
   @Delete(':id')
   delete(@Param('id') id: number) {
-    return this.trackService.remove(id);
-  }
-
-  @Get()
-  getAll(@Query('count') count: number, @Query('offset') offset: number) {
-    return this.trackService.getAll(count, offset);
-  }
-
-  @Get('/search')
-  search(@Query('searchQuery') searchQuery: string) {
-    return this.trackService.search(searchQuery);
-  }
-
-  @Get(':id')
-  getOne(@Param('id') id: number) {
-    return this.trackService.getOne(id);
+    return this.trackService.delete(id);
   }
 
   @Post('/comment')

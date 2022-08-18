@@ -17,22 +17,6 @@ export class TrackService {
     private fileService: FileService,
   ) {}
 
-  async create(dto: CreateTrackDto, picture, audio): Promise<Track> {
-    const audioPath = this.fileService.createFile(FileType.AUDIO, audio);
-    const picturePath = this.fileService.createFile(FileType.IMAGE, picture);
-    return await this.trackModel.create({
-      ...dto,
-      listens: 0,
-      audio: audioPath,
-      picture: picturePath,
-    });
-  }
-
-  async remove(id: number): Promise<void> {
-    const track = await this.trackModel.findOne({ where: { id } });
-    await track.destroy();
-  }
-
   async getAll(count = 10, offset = 0): Promise<Track[]> {
     return this.trackModel.findAll({
       offset: offset,
@@ -49,6 +33,33 @@ export class TrackService {
     });
   }
 
+  async search(searchQuery: string): Promise<Track[]> {
+    return this.trackModel.findAll({
+      where: {
+        [Op.or]: [
+          { name: { [Op.iLike]: '%' + searchQuery + '%' } },
+          { artist: { [Op.iLike]: '%' + searchQuery + '%' } },
+        ],
+      },
+    });
+  }
+
+  async create(dto: CreateTrackDto, picture, audio): Promise<Track> {
+    const audioPath = this.fileService.createFile(FileType.AUDIO, audio);
+    const picturePath = this.fileService.createFile(FileType.IMAGE, picture);
+    return await this.trackModel.create({
+      ...dto,
+      listens: 0,
+      audio: audioPath,
+      picture: picturePath,
+    });
+  }
+
+  async delete(id: number): Promise<void> {
+    const track = await this.trackModel.findOne({ where: { id } });
+    await track.destroy();
+  }
+
   async addComment(dto: CreateCommentDto): Promise<Comment> {
     const track = await this.trackModel.findOne({ where: { id: dto.trackId } });
     const comment = await this.commentModel.create({ ...dto });
@@ -60,11 +71,5 @@ export class TrackService {
     const track = await this.trackModel.findOne({ where: { id } });
     track.listens += 1;
     await track.save();
-  }
-
-  async search(searchQuery: string): Promise<Track[]> {
-    return this.trackModel.findAll({
-      where: { name: { [Op.iLike]: '%' + searchQuery + '%' } },
-    });
   }
 }

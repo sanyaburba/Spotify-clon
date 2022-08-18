@@ -17,7 +17,34 @@ export class AlbumService {
     private fileService: FileService,
   ) {}
 
-  async createAlbum(dto: CreateAlbumDto, picture): Promise<Album> {
+  async getAll(count = 10, offset = 0): Promise<Album[]> {
+    return this.albumModel.findAll({
+      offset: offset,
+      limit: count,
+      order: ['id'],
+      include: [{ model: Track, attributes: ['id'] }],
+    });
+  }
+
+  async getOne(id: number): Promise<Album> {
+    return this.albumModel.findOne({
+      where: { id },
+      include: { model: Track },
+    });
+  }
+
+  async search(searchQuery: string): Promise<Album[]> {
+    return this.albumModel.findAll({
+      where: {
+        [Op.or]: [
+          { name: { [Op.iLike]: '%' + searchQuery + '%' } },
+          { artist: { [Op.iLike]: '%' + searchQuery + '%' } },
+        ],
+      },
+    });
+  }
+
+  async create(dto: CreateAlbumDto, picture): Promise<Album> {
     const picturePath = this.fileService.createFile(FileType.IMAGE, picture);
     const album = await this.albumModel.create({
       ...dto,
@@ -31,6 +58,11 @@ export class AlbumService {
     return album;
   }
 
+  async delete(id: number): Promise<void> {
+    const album = await this.albumModel.findOne({ where: { id } });
+    await album.destroy();
+  }
+
   async addTracks(dto: AddTracksDto): Promise<void> {
     const album = await this.albumModel.findOne({
       where: { id: +dto.albumId },
@@ -39,37 +71,10 @@ export class AlbumService {
     dto.tracks.forEach((track) => album.$add('tracks', [track]));
     await album.save();
   }
-
-  async deleteAlbum(id: number): Promise<void> {
-    const album = await this.albumModel.findOne({ where: { id } });
-    await album.destroy();
-  }
-
-  async getAllAlbums(count = 10, offset = 0): Promise<Album[]> {
-    return this.albumModel.findAll({
-      offset: offset,
-      limit: count,
-      order: ['id'],
-      include: [{ model: Track, attributes: ['id'] }],
-    });
-  }
-
-  async getOneAlbum(id: number): Promise<Album> {
-    return this.albumModel.findOne({
-      where: { id },
-      include: { model: Track },
-    });
-  }
-
   // async listen(id: number): Promise<void> {
   //   const album = await this.albumModel.findOne({ where: { id } });
   //   album.listens += 1;
   //   await album.save();
-  // }
 
-  async search(searchQuery: string): Promise<Album[]> {
-    return this.albumModel.findAll({
-      where: { name: { [Op.iLike]: '%' + searchQuery + '%' } },
-    });
-  }
+  // }
 }
